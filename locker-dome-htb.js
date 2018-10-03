@@ -34,6 +34,14 @@ var Whoopsie = require('whoopsie.js');
  * @class
  */
 function LockerDomeHtb(configs) {
+
+    // lockerdome endpoint w/ AJAX only
+    if (!Network.isXhrSupported()) {
+      //? if (DEBUG) {
+        Scribe.warn('Partner lockerdome requires AJAX support. Aborting instantiation.');
+      //? }
+      return null;
+    }
     /* =====================================
      * Data
      * ---------------------------------- */
@@ -129,11 +137,16 @@ function LockerDomeHtb(configs) {
          */
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
-        var queryObj = {};
-        var callbackId = System.generateUniqueId();
 
-        /* Change this to your bidder endpoint. */
-        var baseUrl = Browser.getProtocol() + '//someAdapterEndpoint.com/bid';
+        /* lockerdome's bidder endpoint w/ cachebuster. */
+        var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
+
+        var queryObj = {
+          url: Browser.getPageUrl(),
+          referrer: Browser.getReferrer(),
+          gdpr: {}
+        };
+
 
         /* ------------------------ Get consent information -------------------------
          * If you want to implement GDPR consent in your adapter, use the function
@@ -159,19 +172,36 @@ function LockerDomeHtb(configs) {
          * returned from gdpr.getConsent() are safe defaults and no attempt has been
          * made by the wrapper to contact a Consent Management Platform.
          */
-        var gdprStatus = ComplianceService.gdpr.getConsent();
         var privacyEnabled = ComplianceService.isPrivacyEnabled();
+        if (privacyEnabled) {
+          var gdprStatus = ComplianceService.gdpr.getConsent();
+          queryObj.gdpr.applies = gdprStatus.applies;
+          queryObj.gdpr.consent = gdprStatus.consentString;
+        }
 
         /* ---------------- Craft bid request using the above returnParcels --------- */
 
-        /* ------- Put GDPR consent code here if you are implementing GDPR ---------- */
+        var bidRequests = [];
+        for (var i = 0; i !== returnParcels.length; i++) {
+          var xSlotRef = returnParcels[i].xSlotRef;
+          bidRequests.push({
+             adUnitId: xSlotRef.adUnitId,
+             requestId: returnParcels[i].requestId
+           });
+        }
+
+        queryObj.bidRequests = bidRequests;
 
         /* -------------------------------------------------------------------------- */
 
         return {
             url: baseUrl,
             data: queryObj,
-            callbackId: callbackId
+            /* Signal a POST request and the content type */
+            networkParamOverrides: {
+            	method: 'POST',
+              contentType: 'text/plain'
+            }
         };
     }
 
@@ -222,7 +252,7 @@ function LockerDomeHtb(configs) {
      *
      * @param {string} sessionId The sessionId, used for stats and other events.
      *
-     * @param {any} adResponse This is the bid response as returned from the bid request, that was either
+     * @param {object} adResponse This is the bid response as returned from the bid request, that was either
      * passed to a JSONP callback or simply sent back via AJAX.
      *
      * @param {object[]} returnParcels The array of original parcels, SAME array that was passed to
@@ -251,7 +281,7 @@ function LockerDomeHtb(configs) {
 
         /* ---------- Process adResponse and extract the bids into the bids array ------------ */
 
-        var bids = adResponse;
+        var bids = adResponse.bids || [];
 
         /* --------------------------------------------------------------------------------- */
 
@@ -265,7 +295,7 @@ function LockerDomeHtb(configs) {
 
             var curBid;
 
-            for (var i = 0; i < bids.length; i++) {
+            for (var k = 0; k < bids.length; k++) {
                 /**
                  * This section maps internal returnParcels and demand returned from the bid request.
                  * In order to match them correctly, they must be matched via some criteria. This
@@ -274,10 +304,9 @@ function LockerDomeHtb(configs) {
                  */
 
                 /* ----------- Fill this out to find a matching bid for the current parcel ------------- */
-                if (curReturnParcel.xSlotRef.someCriteria === bids[i].someCriteria) {
-                    curBid = bids[i];
-                    bids.splice(i, 1);
-
+                if (curReturnParcel.requestId === bids[k].requestId) {
+                    curBid = bids[k];
+                    bids.splice(k, 1);
                     break;
                 }
             }
@@ -298,7 +327,7 @@ function LockerDomeHtb(configs) {
              * these local variables */
 
             /* The bid price for the given slot */
-            var bidPrice = curBid.price;
+            var bidPrice = curBid.cpm * 100;
 
             /* The size of the given slot */
             var bidSize = [Number(curBid.width), Number(curBid.height)];
@@ -306,7 +335,7 @@ function LockerDomeHtb(configs) {
             /* The creative/adm for the given slot that will be rendered if is the winner.
              * Please make sure the URL is decoded and ready to be document.written.
              */
-            var bidCreative = curBid.adm;
+            var bidCreative = curBid.ad;
 
             /* The dealId if applicable for this slot. */
             var bidDealId = curBid.dealid;
@@ -437,12 +466,11 @@ function LockerDomeHtb(configs) {
                 pmid: 'ix_lkdm_dealid'
             },
 
-            /* The bid price unit (in cents) the endpoint returns, please refer to the readme for details */
-            bidUnitInCents: 1,
-            lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
-            callbackType: Partner.CallbackTypes.ID,
-            architecture: Partner.Architectures.SRA,
-            requestType: Partner.RequestTypes.ANY
+            bidUnitInCents: 100, // The bid price unit (in cents) the endpoint returns, please refer to the readme for details
+            // lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
+            callbackType: Partner.CallbackTypes.NONE, // endpoint supports AJAX only and will return a pure JSON response rather than JSONP with a callback function
+            architecture: Partner.Architectures.FSRA, // endpoint can handle any number of slots in a single request in any combination, including multiple requests for the same slot
+            requestType: Partner.RequestTypes.AJAX // Use only AJAX for bid requests
         };
 
         /* --------------------------------------------------------------------------------------- */
