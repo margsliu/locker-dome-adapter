@@ -327,7 +327,7 @@ function LockerDomeHtb(configs) {
              * these local variables */
 
             /* The bid price for the given slot */
-            var bidPrice = curBid.cpm * 100;
+            var bidPrice = curBid.cpm;
 
             /* The size of the given slot */
             var bidSize = [Number(curBid.width), Number(curBid.height)];
@@ -339,6 +339,7 @@ function LockerDomeHtb(configs) {
 
             /* The dealId if applicable for this slot. */
             var bidDealId = curBid.dealid;
+            // var bidDealId = 100;
 
             /* Explicitly pass */
             var bidIsPass = bidPrice <= 0;
