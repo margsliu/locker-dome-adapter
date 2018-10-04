@@ -39,7 +39,7 @@ function LockerDomeHtb(configs) {
         Scribe.warn('Partner lockerdome requires AJAX support. Aborting instantiation.');
         //? }
 
-      return null;
+        return null;
     }
 
     /* =====================================
@@ -139,13 +139,10 @@ function LockerDomeHtb(configs) {
         /* ---------------------- PUT CODE HERE ------------------------------------ */
 
         var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
-
-        // TODO
-
         var queryObj = {
-          url: Browser.getPageUrl(),
-          referrer: Browser.getReferrer(),
-          gdpr: {}
+            url: Browser.getPageUrl(),
+            referrer: Browser.getReferrer(),
+            gdpr: {}
         };
 
         /* ------------------------ Get consent information -------------------------
@@ -174,20 +171,20 @@ function LockerDomeHtb(configs) {
          */
         var privacyEnabled = ComplianceService.isPrivacyEnabled();
         if (privacyEnabled) {
-          var gdprStatus = ComplianceService.gdpr.getConsent();
-          queryObj.gdpr.applies = gdprStatus.applies;
-          queryObj.gdpr.consent = gdprStatus.consentString;
+            var gdprStatus = ComplianceService.gdpr.getConsent();
+            queryObj.gdpr.applies = gdprStatus.applies;
+            queryObj.gdpr.consent = gdprStatus.consentString;
         }
 
         /* ---------------- Craft bid request using the above returnParcels --------- */
 
         var bidRequests = [];
         for (var i = 0; i !== returnParcels.length; i++) {
-          var xSlotRef = returnParcels[i].xSlotRef;
-          bidRequests.push({
-             adUnitId: xSlotRef.adUnitId,
-             requestId: returnParcels[i].requestId
-           });
+            var xSlotRef = returnParcels[i].xSlotRef;
+            bidRequests.push({
+                adUnitId: xSlotRef.adUnitId,
+                requestId: returnParcels[i].requestId
+            });
         }
 
         queryObj.bidRequests = bidRequests;
@@ -198,8 +195,8 @@ function LockerDomeHtb(configs) {
             url: baseUrl,
             data: queryObj,
             networkParamOverrides: {
-              method: 'POST',
-              contentType: 'text/plain'
+                method: 'POST',
+                contentType: 'text/plain'
             }
         };
     }
@@ -304,10 +301,10 @@ function LockerDomeHtb(configs) {
 
                 /* ----------- Fill this out to find a matching bid for the current parcel ------------- */
                 if (curReturnParcel.requestId === bids[k].requestId) {
-                  curBid = bids[k];
-                  bids.splice(k, 1);
+                    curBid = bids[k];
+                    bids.splice(k, 1);
 
-                  break;
+                    break;
                 }
             }
 
