@@ -12,7 +12,6 @@ var Size = require('size.js');
 var SpaceCamp = require('space-camp.js');
 var System = require('system.js');
 var Network = require('network.js');
-var Utilities = require('utilities.js');
 
 var ComplianceService;
 var RenderService;
@@ -34,14 +33,15 @@ var Whoopsie = require('whoopsie.js');
  * @class
  */
 function LockerDomeHtb(configs) {
-
-    // lockerdome endpoint w/ AJAX only
+    // Endpoint w/ AJAX only
     if (!Network.isXhrSupported()) {
-      //? if (DEBUG) {
+        // ? if (DEBUG) {
         Scribe.warn('Partner lockerdome requires AJAX support. Aborting instantiation.');
-      //? }
+        //? }
+
       return null;
     }
+
     /* =====================================
      * Data
      * ---------------------------------- */
@@ -138,15 +138,15 @@ function LockerDomeHtb(configs) {
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
 
-        /* lockerdome's bidder endpoint w/ cachebuster. */
         var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
+
+        // TODO
 
         var queryObj = {
           url: Browser.getPageUrl(),
           referrer: Browser.getReferrer(),
           gdpr: {}
         };
-
 
         /* ------------------------ Get consent information -------------------------
          * If you want to implement GDPR consent in your adapter, use the function
@@ -197,9 +197,8 @@ function LockerDomeHtb(configs) {
         return {
             url: baseUrl,
             data: queryObj,
-            /* Signal a POST request and the content type */
             networkParamOverrides: {
-            	method: 'POST',
+              method: 'POST',
               contentType: 'text/plain'
             }
         };
@@ -305,9 +304,10 @@ function LockerDomeHtb(configs) {
 
                 /* ----------- Fill this out to find a matching bid for the current parcel ------------- */
                 if (curReturnParcel.requestId === bids[k].requestId) {
-                    curBid = bids[k];
-                    bids.splice(k, 1);
-                    break;
+                  curBid = bids[k];
+                  bids.splice(k, 1);
+
+                  break;
                 }
             }
 
@@ -339,7 +339,6 @@ function LockerDomeHtb(configs) {
 
             /* The dealId if applicable for this slot. */
             var bidDealId = curBid.dealid;
-            // var bidDealId = 100;
 
             /* Explicitly pass */
             var bidIsPass = bidPrice <= 0;
@@ -467,11 +466,12 @@ function LockerDomeHtb(configs) {
                 pmid: 'ix_lkdm_dealid'
             },
 
-            bidUnitInCents: 100, // The bid price unit (in cents) the endpoint returns, please refer to the readme for details
-            // lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
-            callbackType: Partner.CallbackTypes.NONE, // endpoint supports AJAX only and will return a pure JSON response rather than JSONP with a callback function
-            architecture: Partner.Architectures.FSRA, // endpoint can handle any number of slots in a single request in any combination, including multiple requests for the same slot
-            requestType: Partner.RequestTypes.AJAX // Use only AJAX for bid requests
+            // The bid price unit (in cents) the endpoint returns, please refer to the readme for details
+            bidUnitInCents: 100,
+            lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
+            callbackType: Partner.CallbackTypes.NONE,
+            architecture: Partner.Architectures.FSRA,
+            requestType: Partner.RequestTypes.AJAX
         };
 
         /* --------------------------------------------------------------------------------------- */
