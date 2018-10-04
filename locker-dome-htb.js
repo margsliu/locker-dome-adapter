@@ -138,7 +138,7 @@ function LockerDomeHtb(configs) {
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
 
-        var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
+        var baseUrl = 'https://local.lockerdome.com:3000/ladbid/indexexchange?cachebuster=' + System.generateUniqueId();
         var payload = {
             url: Browser.getPageUrl(),
             referrer: Browser.getReferrer()
@@ -249,7 +249,7 @@ function LockerDomeHtb(configs) {
      *
      * @param {string} sessionId The sessionId, used for stats and other events.
      *
-     * @param {object} adResponse This is the bid response as returned from the bid request, that was either
+     * @param {any} adResponse This is the bid response as returned from the bid request, that was either
      * passed to a JSONP callback or simply sent back via AJAX.
      *
      * @param {object[]} returnParcels The array of original parcels, SAME array that was passed to
@@ -278,7 +278,7 @@ function LockerDomeHtb(configs) {
 
         /* ---------- Process adResponse and extract the bids into the bids array ------------ */
 
-        var bids = adResponse.bids || [];
+        var bids = adResponse && adResponse.bids || [];
 
         /* --------------------------------------------------------------------------------- */
 
@@ -292,7 +292,7 @@ function LockerDomeHtb(configs) {
 
             var curBid;
 
-            for (var k = 0; k < bids.length; k++) {
+            for (var i = 0; i < bids.length; i++) {
                 /**
                  * This section maps internal returnParcels and demand returned from the bid request.
                  * In order to match them correctly, they must be matched via some criteria. This
@@ -301,9 +301,9 @@ function LockerDomeHtb(configs) {
                  */
 
                 /* ----------- Fill this out to find a matching bid for the current parcel ------------- */
-                if (curReturnParcel.requestId === bids[k].requestId) {
-                    curBid = bids[k];
-                    bids.splice(k, 1);
+                if (curReturnParcel.requestId === bids[i].requestId) {
+                    curBid = bids[i];
+                    bids.splice(i, 1);
 
                     break;
                 }
