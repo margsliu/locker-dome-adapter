@@ -141,8 +141,7 @@ function LockerDomeHtb(configs) {
         var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
         var data = {
             url: Browser.getPageUrl(),
-            referrer: Browser.getReferrer(),
-            gdpr: {}
+            referrer: Browser.getReferrer()
         };
 
         /* ------------------------ Get consent information -------------------------
@@ -172,8 +171,10 @@ function LockerDomeHtb(configs) {
         var privacyEnabled = ComplianceService.isPrivacyEnabled();
         if (privacyEnabled) {
             var gdprStatus = ComplianceService.gdpr.getConsent();
-            data.gdpr.applies = gdprStatus.applies;
-            data.gdpr.consent = gdprStatus.consentString;
+            data.gdpr = {
+                applies: gdprStatus.applies,
+                consent: gdprStatus.consentString
+            };
         }
 
         /* ---------------- Craft bid request using the above returnParcels --------- */
