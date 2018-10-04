@@ -12,6 +12,7 @@ var Size = require('size.js');
 var SpaceCamp = require('space-camp.js');
 var System = require('system.js');
 var Network = require('network.js');
+var Utilities = require('utilities.js');
 
 var ComplianceService;
 var RenderService;
@@ -37,7 +38,7 @@ function LockerDomeHtb(configs) {
     if (!Network.isXhrSupported()) {
         // ? if (DEBUG) {
         Scribe.warn('Partner lockerdome requires AJAX support. Aborting instantiation.');
-        //? }
+        // ? }
 
         return null;
     }
@@ -139,7 +140,7 @@ function LockerDomeHtb(configs) {
         /* ---------------------- PUT CODE HERE ------------------------------------ */
 
         var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
-        var data = {
+        var payload = {
             url: Browser.getPageUrl(),
             referrer: Browser.getReferrer()
         };
@@ -171,7 +172,7 @@ function LockerDomeHtb(configs) {
         var privacyEnabled = ComplianceService.isPrivacyEnabled();
         if (privacyEnabled) {
             var gdprStatus = ComplianceService.gdpr.getConsent();
-            data.gdpr = {
+            payload.gdpr = {
                 applies: gdprStatus.applies,
                 consent: gdprStatus.consentString
             };
@@ -188,13 +189,13 @@ function LockerDomeHtb(configs) {
             });
         }
 
-        data.bidRequests = bidRequests;
+        payload.bidRequests = bidRequests;
 
         /* -------------------------------------------------------------------------- */
 
         return {
             url: baseUrl,
-            data: data,
+            data: payload,
             networkParamOverrides: {
                 method: 'POST',
                 contentType: 'text/plain'
