@@ -137,7 +137,7 @@ function LockerDomeHtb(configs) {
          */
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
-        var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
+        var baseUrl = 'https://lockerdome.com/ladbid/indexexchange?cachebuster=' + System.generateUniqueId();
         var payload = {
             url: Browser.getPageUrl(),
             referrer: Browser.getReferrer()

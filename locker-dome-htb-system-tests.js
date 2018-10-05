@@ -32,7 +32,7 @@ function getConfig() {
 function getBidRequestRegex() {
     return {
         method: 'POST',
-        urlRegex: /lockerdome\.com\/ladbid\/prebid/
+        urlRegex: /lockerdome\.com\/ladbid\/indexexchange/
     };
 }
 
