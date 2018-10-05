@@ -137,8 +137,7 @@ function LockerDomeHtb(configs) {
          */
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
-
-        var baseUrl = 'https://local.lockerdome.com:3000/ladbid/indexexchange?cachebuster=' + System.generateUniqueId();
+        var baseUrl = 'https://lockerdome.com/ladbid/prebid?cachebuster=' + System.generateUniqueId();
         var payload = {
             url: Browser.getPageUrl(),
             referrer: Browser.getReferrer()
@@ -180,15 +179,20 @@ function LockerDomeHtb(configs) {
         /* ---------------- Craft bid request using the above returnParcels --------- */
 
         var bidRequests = [];
+        var requestIds = [];
         for (var i = 0; i !== returnParcels.length; i++) {
-            var xSlotRef = returnParcels[i].xSlotRef;
+            var returnParcel = returnParcels[i];
+            var xSlotRef = returnParcel.xSlotRef;
+            var requestId = returnParcel.requestId;
             bidRequests.push({
                 adUnitId: xSlotRef.adUnitId,
-                requestId: returnParcels[i].requestId
+                requestId: requestId
             });
+            requestIds.push(requestId);
         }
 
         payload.bidRequests = bidRequests;
+        baseUrl += '&requestIds=' + requestIds.join(',');
 
         /* -------------------------------------------------------------------------- */
 
@@ -278,7 +282,10 @@ function LockerDomeHtb(configs) {
 
         /* ---------- Process adResponse and extract the bids into the bids array ------------ */
 
-        var bids = adResponse && adResponse.bids || [];
+        var bids = adResponse && adResponse.bids;
+        if (!bids) {
+            bids = [];
+        }
 
         /* --------------------------------------------------------------------------------- */
 
